@@ -141,11 +141,13 @@ function openModal(service, origin) {
   continueLink.hidden = true;
   selectionHint.hidden = false;
   modalBackdrop.hidden = false;
+  modalBackdrop.classList.add("is-open");
   document.body.style.overflow = "hidden";
   modalCloseButton.focus();
 }
 
 function closeModal() {
+  modalBackdrop.classList.remove("is-open");
   modalBackdrop.hidden = true;
   document.body.style.overflow = "";
   if (lastFocusedElement) lastFocusedElement.focus();
