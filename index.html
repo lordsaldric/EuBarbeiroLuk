@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Eu Barbeiro Luk. Estilo, precisão e cuidado em cada detalhe.">
+  <meta name="theme-color" content="#06130e">
+  <title>Eu Barbeiro Luk</title>
+  <link rel="icon" href="imagens/logo-marca.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilos.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="floating-header" id="cabecalho">
+    <a class="brand" href="#inicio" aria-label="Eu Barbeiro Luk, início">
+      <span class="brand-mark">
+        <span class="brand-monogram" aria-hidden="true">L</span>
+        <img src="imagens/logo-marca.png" alt="" class="brand-logo is-loaded">
+      </span>
+      <span class="brand-copy"><strong>EuBarbeiro</strong><small>Luk</small></span>
+    </a>
+    <nav class="nav" id="menu-principal" aria-label="Navegação principal">
+      <a href="#inicio">Início</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#proprietario">Sobre</a>
+      <a href="#trabalho">Trabalho</a>
+      <a href="#catalogo">Catálogo</a>
+    </nav>
+    <a class="header-cta whatsapp-link" data-message="Olá! Gostaria de consultar os horários disponíveis na Eu Barbeiro Luk." target="_blank" rel="noreferrer">Agendar</a>
+    <button class="menu-button" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-principal"><span></span><span></span></button>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero-media" aria-label="Fachada da Eu Barbeiro Luk">
+        <img src="imagens/fachada.jpg" alt="Fachada da barbearia Eu Barbeiro Luk" class="hero-photo is-loaded">
+      </div>
+      <div class="hero-wash"></div><div class="hero-orb hero-orb-one"></div><div class="hero-orb hero-orb-two"></div>
+      <div class="hero-content reveal">
+        <p class="eyebrow"><span></span> Estilo, precisão e identidade</p>
+        <h1>Seu estilo começa<br>com um <em>bom corte.</em></h1>
+        <p class="hero-description">Um espaço pensado para quem valoriza técnica, atenção aos detalhes e uma experiência de cuidado do início ao fim.</p>
+        <div class="hero-actions">
+          <a class="button button-primary whatsapp-link" data-message="Olá! Quero agendar um horário na Eu Barbeiro Luk." target="_blank" rel="noreferrer">Agendar meu horário <span aria-hidden="true">↗</span></a>
+          <a class="text-link" href="#servicos">Conhecer serviços <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+      <div class="hero-note glass-card" aria-label="Atendimento personalizado">
+        <span class="note-mark" aria-hidden="true">✦</span><div><strong>Atendimento personalizado</strong><small>Do seu jeito, no seu ritmo.</small></div>
+      </div>
+    </section>
+
+    <section class="section services" id="servicos">
+      <div class="section-heading">
+        <div><p class="eyebrow"><span></span> Serviços</p><h2>Cuidado que aparece<br>em cada <em>detalhe.</em></h2></div>
+        <p>Escolha o serviço ideal para o seu momento. Cada atendimento é feito com calma, técnica e foco no resultado.</p>
+      </div>
+      <div class="service-grid">
+        <article class="service-card"><div class="service-top"><span class="service-symbol" aria-hidden="true">✂</span><small>01</small></div><h3>Corte masculino</h3><p>Corte construído de acordo com seu estilo, formato do rosto e preferências.</p><a href="#catalogo">Ver opções <span aria-hidden="true">↗</span></a></article>
+        <article class="service-card"><div class="service-top"><span class="service-symbol" aria-hidden="true">⌁</span><small>02</small></div><h3>Barba e acabamento</h3><p>Contornos definidos, acabamento cuidadoso e atenção a cada detalhe.</p><a href="#catalogo">Ver opções <span aria-hidden="true">↗</span></a></article>
+        <article class="service-card"><div class="service-top"><span class="service-symbol" aria-hidden="true">✦</span><small>03</small></div><h3>Corte + barba</h3><p>Uma experiência completa para renovar o visual com harmonia e personalidade.</p><a href="#catalogo">Ver opções <span aria-hidden="true">↗</span></a></article>
+      </div>
+    </section>
+
+    <section class="owner-section" id="proprietario">
+      <div class="owner-glow"></div>
+      <div class="owner-layout">
+        <div class="owner-photo-wrap reveal">
+          <img src="imagens/proprietario.png" alt="Lucas, proprietário e barbeiro da Eu Barbeiro Luk" loading="lazy" class="owner-photo is-loaded">
+          <span class="owner-photo-caption">Precisão em cada detalhe</span>
+        </div>
+        <div class="owner-content reveal">
+          <p class="eyebrow"><span></span> Por trás de cada corte</p>
+          <h2>Conheça quem está por trás de <em>cada corte.</em></h2>
+          <div class="owner-role"><span>Lucas</span><small>Proprietário e barbeiro</small></div>
+          <!-- EDITE A APRESENTAÇÃO PROFISSIONAL NOS PARÁGRAFOS ABAIXO. -->
+          <p>Lucas está à frente da Eu Barbeiro Luk, cuidando pessoalmente de cada atendimento e buscando entender o estilo de cada cliente antes de iniciar o serviço.</p>
+          <p>Sua forma de trabalhar combina atenção, técnica e cuidado com o acabamento para entregar um resultado feito sob medida.</p>
+          <div class="owner-values"><span><b>01</b> Atendimento atento</span><span><b>02</b> Cuidado nos detalhes</span><span><b>03</b> Compromisso com a qualidade</span></div>
+          <a class="button button-primary whatsapp-link" data-message="Olá! Gostaria de agendar um horário com Lucas na Eu Barbeiro Luk." target="_blank" rel="noreferrer">Agendar com Lucas <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="video-section" id="trabalho">
+      <div class="video-aura video-aura-one"></div><div class="video-aura video-aura-two"></div>
+      <div class="video-heading reveal">
+        <p class="eyebrow centered"><span></span> Nosso trabalho <span></span></p>
+        <h2>Veja nosso trabalho <em>de perto.</em></h2>
+        <p>Detalhes, técnica e cuidado em cada transformação.</p>
+      </div>
+      <div class="video-frame reveal">
+        <div class="video-placeholder" aria-hidden="true"><span class="video-placeholder-mark">L</span><strong>VÍDEO DEMONSTRATIVO</strong><small>videos/demonstracao-cortes.mp4</small></div>
+        <video class="showcase-video is-ready" src="videos/demonstracao-cortes.mp4" poster="imagens/capa-video.jpg" preload="metadata" playsinline controls aria-label="Demonstração de cortes, acabamento e barba">Seu navegador não oferece suporte à reprodução de vídeo.</video>
+        <button class="custom-play" type="button" aria-label="Reproduzir vídeo demonstrativo"><span aria-hidden="true">▶</span></button>
+        <div class="video-corner-label"><span></span> cortes · barba · acabamento</div>
+      </div>
+      <a class="button button-primary video-cta whatsapp-link" data-message="Olá! Assisti ao vídeo da Eu Barbeiro Luk e gostaria de consultar os horários disponíveis." target="_blank" rel="noreferrer">Quero agendar meu corte <span aria-hidden="true">↗</span></a>
+    </section>
+
+    <section class="catalogue section" id="catalogo">
+      <div class="catalogue-heading">
+        <div><p class="eyebrow"><span></span> Catálogo de serviços</p><h2>Encontre o cuidado ideal para o seu <em>estilo.</em></h2></div>
+        <p>Escolha uma categoria e consulte valores e horários diretamente pelo WhatsApp.</p>
+      </div>
+      <div class="catalogue-filters" role="group" aria-label="Filtrar serviços por categoria">
+        <button type="button" data-category="Todos" aria-pressed="false">Todos</button>
+        <button type="button" data-category="Cortes" class="is-active" aria-pressed="true">Cortes</button>
+        <button type="button" data-category="Barba" aria-pressed="false">Barba</button>
+        <button type="button" data-category="Cor e transformação" aria-pressed="false">Cor e transformação</button>
+        <button type="button" data-category="Tratamentos" aria-pressed="false">Tratamentos</button>
+      </div>
+      <div class="catalogue-grid" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-cta">
+      <div><span>Seu próximo visual começa aqui</span><h2>Pronto para cuidar do seu <em>estilo?</em></h2></div>
+      <a class="button button-primary whatsapp-link" data-message="Olá! Gostaria de consultar os horários disponíveis na Eu Barbeiro Luk." target="_blank" rel="noreferrer">Agendar um horário <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="footer-main">
+      <div class="footer-intro"><a class="footer-brand" href="#inicio" aria-label="EuBarbeiroLuk, voltar ao início"><img src="imagens/logo.png" alt="EuBarbeiroLuk" loading="lazy"></a><p>Atendimento atento, técnica e cuidado em cada detalhe.</p></div>
+      <div class="footer-column"><span>Navegação</span><a href="#inicio">Início</a><a href="#servicos">Serviços</a><a href="#proprietario">Lucas</a><a href="#catalogo">Catálogo</a></div>
+      <div class="footer-column"><span>Serviços</span><a href="#catalogo">Cortes</a><a href="#catalogo">Barba</a><a href="#catalogo">Cor e transformação</a><a href="#catalogo">Tratamentos</a></div>
+      <div class="footer-column footer-contact"><span>Agendamento</span><p>Consulte os horários disponíveis e escolha seu serviço.</p><a class="whatsapp-link" data-message="Olá! Gostaria de agendar um horário na Eu Barbeiro Luk." target="_blank" rel="noreferrer">Falar no WhatsApp <b aria-hidden="true">↗</b></a></div>
+    </div>
+    <div class="footer-bottom"><small>© <span id="ano-atual"></span> EuBarbeiroLuk</small><a href="#inicio">Voltar ao topo ↑</a></div>
+  </footer>
+
+  <div class="barber-modal-backdrop" id="barber-modal-backdrop" hidden>
+    <div class="barber-modal" role="dialog" aria-modal="true" aria-labelledby="barber-modal-title" aria-describedby="barber-modal-description">
+      <button class="barber-modal-close" type="button" aria-label="Fechar seleção de barbeiro">×</button>
+      <p class="eyebrow centered"><span></span> Escolha o profissional <span></span></p>
+      <h2 id="barber-modal-title">Quem vai cuidar do seu <em>estilo?</em></h2>
+      <p id="barber-modal-description" class="barber-modal-service">Serviço escolhido: <strong id="servico-escolhido"></strong></p>
+      <div class="barber-grid">
+        <button type="button" class="barber-card" data-barber="Lucas" aria-pressed="false"><span class="barber-avatar" aria-hidden="true">L</span><span class="barber-card-copy"><strong>Lucas</strong><small>Disponível para seleção</small></span><span class="barber-card-status" aria-hidden="true">✓</span></button>
+        <button type="button" class="barber-card" data-barber="Willian" aria-pressed="false"><span class="barber-avatar" aria-hidden="true">W</span><span class="barber-card-copy"><strong>Willian</strong><small>Disponível para seleção</small></span><span class="barber-card-status" aria-hidden="true">✓</span></button>
+        <button type="button" class="barber-card" disabled aria-disabled="true"><span class="barber-avatar" aria-hidden="true">○</span><span class="barber-card-copy"><strong>Vazio</strong><small>Indisponível</small></span><span class="barber-card-status" aria-hidden="true">×</span></button>
+        <button type="button" class="barber-card" disabled aria-disabled="true"><span class="barber-avatar" aria-hidden="true">○</span><span class="barber-card-copy"><strong>Vazio</strong><small>Indisponível</small></span><span class="barber-card-status" aria-hidden="true">×</span></button>
+      </div>
+      <div class="barber-modal-footer">
+        <button type="button" class="barber-back-button">Voltar ao catálogo</button>
+        <span class="barber-selection-hint">Selecione Lucas ou Willian para continuar</span>
+        <a class="button button-primary barber-continue" target="_blank" rel="noreferrer" hidden>Continuar <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
