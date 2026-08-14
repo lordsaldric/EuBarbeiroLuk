@@ -7,6 +7,7 @@ Site estático em HTML, CSS e JavaScript com sistema completo de agendamentos no
 - `index.html`: site público e fluxo de agendamento
 - `admin/login.html`: login dos donos
 - `admin/primeiro-acesso.html`: criação de senha para e-mails autorizados
+- `admin/callback.html`: retorno seguro da confirmação de e-mail
 - `admin/index.html`: painel administrativo
 - `scripts/config.js`: conexão pública e segura com o Supabase
 - `supabase/migrations`: estrutura completa e versionada do banco
@@ -20,6 +21,8 @@ Site estático em HTML, CSS e JavaScript com sistema completo de agendamentos no
 - Status pendente, aceito, negado e concluído
 - Bloqueio atômico de horários duplicados
 - Login administrativo com e-mail e senha
+- Sessão persistente, saída funcional e retorno de confirmação
+- Atualização automática de novos pedidos em tempo real
 - Lista completa de agendamentos e filtros
 - Agenda diária por barbeiro
 - Cadastro, edição, remoção e desativação de barbeiros
@@ -37,6 +40,19 @@ Site estático em HTML, CSS e JavaScript com sistema completo de agendamentos no
 6. Clique em **Deploy**.
 
 O endereço do painel será `https://seu-dominio.com/admin/login`.
+
+## URLs de autenticação do Supabase
+
+No projeto hospedado, abra **Authentication > URL Configuration** e mantenha:
+
+- **Site URL:** `https://eu-barbeiro-luk.vercel.app`
+- **Redirect URLs:**
+  - `https://eu-barbeiro-luk.vercel.app/admin/callback`
+  - `http://localhost:3000/admin/callback`
+  - `http://localhost:4173/admin/callback`
+  - `http://127.0.0.1:4173/admin/callback`
+
+O cadastro envia explicitamente o usuário para `/admin/callback`. A rota aceita o retorno por código PKCE ou pela sessão detectada no endereço e direciona somente administradores ativos ao painel.
 
 ## Backend
 

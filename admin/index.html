@@ -6,21 +6,21 @@
   <meta name="theme-color" content="#06130e">
   <meta name="robots" content="noindex,nofollow">
   <title>Painel administrativo | Eu Barbeiro Luk</title>
-  <link rel="icon" href="../imagens/logo-marca.png">
+  <link rel="icon" href="/imagens/logo-marca.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css?v=3">
-  <script src="../vendor/supabase.min.js" defer></script>
-  <script src="../scripts/config.js?v=3" defer></script>
-  <script src="../scripts/supabase-client.js?v=3" defer></script>
-  <script src="dashboard.js?v=3" defer></script>
+  <link rel="stylesheet" href="/admin/admin.css?v=4">
+  <script src="/vendor/supabase.min.js" defer></script>
+  <script src="/scripts/config.js?v=4" defer></script>
+  <script src="/scripts/supabase-client.js?v=4" defer></script>
+  <script src="/admin/dashboard.js?v=4" defer></script>
 </head>
 <body class="dashboard-page is-loading">
   <div class="admin-loader" id="admin-loader"><span>L</span><p>Protegendo sua agenda...</p></div>
 
   <aside class="admin-sidebar liquid-panel">
-    <a class="admin-brand" href="../index.html"><img src="../imagens/logo-marca.png" alt=""><span><strong>EuBarbeiro</strong><em>Luk</em></span></a>
+    <a class="admin-brand" href="/"><img src="/imagens/logo-marca.png" alt=""><span><strong>EuBarbeiro</strong><em>Luk</em></span></a>
     <nav class="admin-nav" aria-label="Navegação administrativa">
       <button class="is-active" type="button" data-view="overview"><span>⌂</span> Visão geral</button>
       <button type="button" data-view="appointments"><span>◷</span> Agendamentos <b id="pending-badge" hidden>0</b></button>
@@ -39,7 +39,7 @@
     <header class="admin-topbar">
       <button class="sidebar-toggle" type="button" aria-label="Abrir menu">☰</button>
       <div><p class="admin-eyebrow"><span></span> Painel administrativo</p><h1 id="view-title">Visão <em>geral.</em></h1></div>
-      <div class="topbar-actions"><span class="online-indicator"><i></i> Agenda online</span><a href="../index.html" target="_blank" rel="noreferrer">Abrir site ↗</a></div>
+      <div class="topbar-actions"><span class="online-indicator" id="online-indicator"><i></i> Agenda online</span><button type="button" class="refresh-button" id="refresh-button">Atualizar</button><a href="/" target="_blank" rel="noreferrer">Abrir site ↗</a></div>
     </header>
 
     <section class="admin-view is-active" data-admin-view="overview">

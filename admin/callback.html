@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06130e">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Confirmando acesso | Eu Barbeiro Luk</title>
+  <link rel="icon" href="/imagens/logo-marca.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/admin.css?v=4">
+  <script src="/vendor/supabase.min.js" defer></script>
+  <script src="/scripts/config.js?v=4" defer></script>
+  <script src="/scripts/supabase-client.js?v=4" defer></script>
+  <script src="/admin/callback.js?v=4" defer></script>
+</head>
+<body class="auth-page">
+  <main class="auth-layout">
+    <a class="auth-brand" href="/" aria-label="Voltar ao site Eu Barbeiro Luk">
+      <span><img src="/imagens/logo-marca.png" alt=""></span>
+      <strong>EuBarbeiro<em>Luk</em></strong>
+    </a>
+    <section class="auth-card liquid-panel callback-card" aria-labelledby="callback-title">
+      <span class="callback-spinner" id="callback-spinner" aria-hidden="true"></span>
+      <p class="admin-eyebrow"><span></span> Acesso protegido</p>
+      <h1 id="callback-title">Confirmando seu <em>acesso.</em></h1>
+      <p class="auth-intro" id="callback-message" role="status" aria-live="polite">Aguarde enquanto validamos sua conta administrativa.</p>
+      <a class="admin-button admin-button-primary callback-link" id="callback-link" href="/admin/login" hidden>Ir para o login <span>↗</span></a>
+    </section>
+  </main>
+</body>
+</html>

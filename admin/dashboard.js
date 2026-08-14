@@ -21,7 +21,11 @@ const state = {
   schedules: [],
   blocks: [],
   appointmentStatus: "all",
-  search: ""
+  search: "",
+  refreshPromise: null,
+  realtimeChannel: null,
+  realtimeTimer: null,
+  activeOperations: new Set()
 };
 
 function escapeHtml(value) {
@@ -63,6 +67,44 @@ function showToast(message, kind = "success") {
   showToast.timer = window.setTimeout(function () { toast.hidden = true; }, 4200);
 }
 
+function setButtonsBusy(buttons, busy, waitingLabel = "Aguarde...") {
+  buttons.forEach(function (button) {
+    if (!button) return;
+    if (busy) {
+      button.dataset.originalLabel = button.innerHTML;
+      button.innerHTML = waitingLabel;
+    } else if (button.dataset.originalLabel) {
+      button.innerHTML = button.dataset.originalLabel;
+      delete button.dataset.originalLabel;
+    }
+    button.disabled = busy;
+    button.setAttribute("aria-busy", String(busy));
+  });
+}
+
+async function runLocked(key, buttons, task) {
+  if (state.activeOperations.has(key)) return false;
+  state.activeOperations.add(key);
+  const list = Array.from(buttons || []).filter(Boolean);
+  setButtonsBusy(list, true);
+  try {
+    await task();
+    return true;
+  } finally {
+    state.activeOperations.delete(key);
+    setButtonsBusy(list.filter(function (button) { return button.isConnected; }), false);
+  }
+}
+
+function setFormBusy(form, busy) {
+  const controls = Array.from(form.querySelectorAll("button, input, select"));
+  controls.forEach(function (control) {
+    control.disabled = busy;
+    control.setAttribute("aria-busy", String(busy));
+  });
+  form.classList.toggle("is-busy", busy);
+}
+
 function emptyState(title, copy) {
   return '<div class="admin-empty"><span>✦</span><strong>' + escapeHtml(title) + '</strong><p>' + escapeHtml(copy) + "</p></div>";
 }
@@ -79,13 +121,13 @@ async function requireAdmin() {
   const sessionResult = await database.auth.getSession();
   const session = sessionResult.data.session;
   if (!session) {
-    window.location.replace("login.html");
+    window.location.replace("/admin/login");
     return false;
   }
   const adminResult = await database.from("admin_users").select("display_name,active").eq("user_id", session.user.id).maybeSingle();
   if (adminResult.error || !adminResult.data || !adminResult.data.active) {
     await database.auth.signOut();
-    window.location.replace("login.html");
+    window.location.replace("/admin/login?reason=unauthorized");
     return false;
   }
   state.user = session.user;
@@ -109,6 +151,57 @@ async function loadAllData() {
   state.services = results[2].data || [];
   state.schedules = results[3].data || [];
   state.blocks = results[4].data || [];
+}
+
+async function refreshDashboard(showSuccess = false) {
+  if (state.refreshPromise) return state.refreshPromise;
+  const indicator = document.getElementById("online-indicator");
+  const refreshButton = document.getElementById("refresh-button");
+  indicator.classList.add("is-syncing");
+  indicator.lastChild.textContent = " Sincronizando";
+  if (refreshButton) setButtonsBusy([refreshButton], true, "Atualizando...");
+  state.refreshPromise = (async function () {
+    try {
+      await loadAllData();
+      renderAll();
+      indicator.classList.remove("is-offline");
+      indicator.lastChild.textContent = " Agenda online";
+      if (showSuccess) showToast("Painel atualizado com os dados do Supabase.");
+    } catch (error) {
+      indicator.classList.add("is-offline");
+      indicator.lastChild.textContent = " Falha de conexão";
+      showToast("Não foi possível atualizar os dados. Tente novamente.", "error");
+      return false;
+    } finally {
+      indicator.classList.remove("is-syncing");
+      if (refreshButton) setButtonsBusy([refreshButton], false);
+      state.refreshPromise = null;
+    }
+  })();
+  return state.refreshPromise;
+}
+
+function scheduleRealtimeRefresh() {
+  window.clearTimeout(state.realtimeTimer);
+  state.realtimeTimer = window.setTimeout(function () { refreshDashboard(false); }, 250);
+}
+
+function subscribeToAppointments() {
+  if (state.realtimeChannel) return;
+  const indicator = document.getElementById("online-indicator");
+  state.realtimeChannel = database
+    .channel("admin-appointments-live")
+    .on("postgres_changes", { event: "*", schema: "public", table: "appointments" }, scheduleRealtimeRefresh)
+    .subscribe(function (status) {
+      if (status === "SUBSCRIBED") {
+        indicator.classList.remove("is-offline");
+        indicator.lastChild.textContent = " Agenda online";
+      }
+      if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        indicator.classList.add("is-offline");
+        indicator.lastChild.textContent = " Reconectando";
+      }
+    });
 }
 
 function renderProfile() {
@@ -265,22 +358,23 @@ function showView(view) {
   if (view === "schedule") renderSchedule();
 }
 
-async function updateAppointmentStatus(id, status) {
-  const result = await database.from("appointments").update({ status }).eq("id", id);
-  if (result.error) {
-    const conflict = result.error.code === "23P01";
-    showToast(conflict ? "Esse horário entra em conflito com outro agendamento." : "Não foi possível atualizar o status.", "error");
-    return;
-  }
-  const item = state.appointments.find(function (appointment) { return appointment.id === id; });
-  if (item) item.status = status;
-  renderAll();
-  showToast("Agendamento marcado como " + statusLabels[status].toLowerCase() + ".");
+async function updateAppointmentStatus(id, status, sourceButton) {
+  const buttons = document.querySelectorAll('[data-appointment-id="' + CSS.escape(id) + '"]');
+  await runLocked("appointment:" + id, buttons.length ? buttons : [sourceButton], async function () {
+    const result = await database.from("appointments").update({ status }).eq("id", id).select("id,status").single();
+    if (result.error) {
+      const conflict = result.error.code === "23P01";
+      showToast(conflict ? "Esse horário entra em conflito com outro agendamento." : "Não foi possível atualizar o status.", "error");
+      return;
+    }
+    await refreshDashboard(false);
+    showToast("Agendamento marcado como " + statusLabels[status].toLowerCase() + ".");
+  });
 }
 
 document.addEventListener("click", function (event) {
   const statusButton = event.target.closest("[data-appointment-action]");
-  if (statusButton) updateAppointmentStatus(statusButton.dataset.appointmentId, statusButton.dataset.appointmentAction);
+  if (statusButton) updateAppointmentStatus(statusButton.dataset.appointmentId, statusButton.dataset.appointmentAction, statusButton);
   const viewButton = event.target.closest("[data-view]");
   if (viewButton) showView(viewButton.dataset.view);
   const goButton = event.target.closest("[data-go-view]");
@@ -302,9 +396,17 @@ document.getElementById("appointment-search").addEventListener("input", function
 document.getElementById("schedule-date").addEventListener("change", renderSchedule);
 document.getElementById("schedule-barber").addEventListener("change", renderSchedule);
 document.querySelector(".sidebar-toggle").addEventListener("click", function () { document.querySelector(".admin-sidebar").classList.toggle("is-open"); });
+document.getElementById("refresh-button").addEventListener("click", function () { refreshDashboard(true); });
 document.getElementById("logout-button").addEventListener("click", async function () {
-  await database.auth.signOut();
-  window.location.replace("login.html");
+  const button = document.getElementById("logout-button");
+  await runLocked("logout", [button], async function () {
+    const result = await database.auth.signOut();
+    if (result.error) {
+      showToast("Não foi possível sair da conta. Tente novamente.", "error");
+      return;
+    }
+    window.location.replace("/admin/login");
+  });
 });
 
 function resetBarberForm() {
@@ -334,43 +436,57 @@ document.getElementById("barber-admin-list").addEventListener("click", async fun
   if (remove) {
     const barber = state.barbers.find(function (item) { return item.id === remove.dataset.removeBarber; });
     if (!barber || !window.confirm("Remover " + barber.name + " da equipe?")) return;
-    const result = await database.from("barbers").delete().eq("id", barber.id);
-    if (result.error) {
-      const deactivated = await database.from("barbers").update({ active: false }).eq("id", barber.id);
-      if (deactivated.error) return showToast("Não foi possível remover o barbeiro.", "error");
-      showToast("O barbeiro possui histórico e foi desativado.");
-    } else showToast("Barbeiro removido.");
-    await loadAllData();
-    renderAll();
-    resetBarberForm();
+    await runLocked("remove-barber:" + barber.id, [remove], async function () {
+      const result = await database.from("barbers").delete().eq("id", barber.id);
+      if (result.error) {
+        const deactivated = await database.from("barbers").update({ active: false }).eq("id", barber.id);
+        if (deactivated.error) {
+          showToast("Não foi possível remover o barbeiro.", "error");
+          return;
+        }
+        showToast("O barbeiro possui histórico e foi desativado.");
+      } else showToast("Barbeiro removido.");
+      await refreshDashboard(false);
+      resetBarberForm();
+    });
   }
 });
 
 document.getElementById("barber-form").addEventListener("submit", async function (event) {
   event.preventDefault();
+  const form = event.currentTarget;
+  if (state.activeOperations.has("save-barber")) return;
   const id = document.getElementById("barber-id").value;
   const payload = {
     name: document.getElementById("barber-name").value.trim(),
     initials: document.getElementById("barber-initials").value.trim().toUpperCase(),
     active: document.getElementById("barber-active").checked
   };
-  const result = id
-    ? await database.from("barbers").update(payload).eq("id", id)
-    : await database.from("barbers").insert({ ...payload, sort_order: state.barbers.length * 10 + 10 });
   const message = document.getElementById("barber-message");
-  if (result.error) {
-    message.textContent = result.error.code === "23505" ? "Já existe um barbeiro com esse nome." : "Não foi possível salvar o barbeiro.";
-    message.dataset.kind = "error";
-    return;
+  state.activeOperations.add("save-barber");
+  setFormBusy(form, true);
+  try {
+    const result = id
+      ? await database.from("barbers").update(payload).eq("id", id)
+      : await database.from("barbers").insert({ ...payload, sort_order: state.barbers.length * 10 + 10 });
+    if (result.error) {
+      message.textContent = result.error.code === "23505" ? "Já existe um barbeiro com esse nome." : "Não foi possível salvar o barbeiro.";
+      message.dataset.kind = "error";
+      return;
+    }
+    showToast(id ? "Barbeiro atualizado." : "Barbeiro adicionado.");
+    await refreshDashboard(false);
+    resetBarberForm();
+  } finally {
+    state.activeOperations.delete("save-barber");
+    setFormBusy(form, false);
   }
-  showToast(id ? "Barbeiro atualizado." : "Barbeiro adicionado.");
-  await loadAllData();
-  renderAll();
-  resetBarberForm();
 });
 
 document.getElementById("schedule-form").addEventListener("submit", async function (event) {
   event.preventDefault();
+  const form = event.currentTarget;
+  if (state.activeOperations.has("save-shift")) return;
   const payload = {
     barber_id: document.getElementById("shift-barber").value,
     weekday: Number(document.getElementById("shift-weekday").value),
@@ -385,31 +501,43 @@ document.getElementById("schedule-form").addEventListener("submit", async functi
     message.dataset.kind = "error";
     return;
   }
-  const result = await database.from("work_schedules").insert(payload);
-  if (result.error) {
-    message.textContent = result.error.code === "23505" ? "Esse turno já está cadastrado." : "Não foi possível adicionar o turno.";
-    message.dataset.kind = "error";
-    return;
+  state.activeOperations.add("save-shift");
+  setFormBusy(form, true);
+  try {
+    const result = await database.from("work_schedules").insert(payload);
+    if (result.error) {
+      message.textContent = result.error.code === "23505" ? "Esse turno já está cadastrado." : "Não foi possível adicionar o turno.";
+      message.dataset.kind = "error";
+      return;
+    }
+    form.reset();
+    message.textContent = "";
+    showToast("Turno adicionado.");
+    await refreshDashboard(false);
+  } finally {
+    state.activeOperations.delete("save-shift");
+    setFormBusy(form, false);
   }
-  event.target.reset();
-  message.textContent = "";
-  showToast("Turno adicionado.");
-  await loadAllData();
-  renderAll();
 });
 
 document.getElementById("shift-list").addEventListener("click", async function (event) {
   const button = event.target.closest("[data-delete-shift]");
   if (!button || !window.confirm("Remover este turno de trabalho?")) return;
-  const result = await database.from("work_schedules").delete().eq("id", button.dataset.deleteShift);
-  if (result.error) return showToast("Não foi possível remover o turno.", "error");
-  await loadAllData();
-  renderAll();
-  showToast("Turno removido.");
+  await runLocked("delete-shift:" + button.dataset.deleteShift, [button], async function () {
+    const result = await database.from("work_schedules").delete().eq("id", button.dataset.deleteShift);
+    if (result.error) {
+      showToast("Não foi possível remover o turno.", "error");
+      return;
+    }
+    await refreshDashboard(false);
+    showToast("Turno removido.");
+  });
 });
 
 document.getElementById("block-form").addEventListener("submit", async function (event) {
   event.preventDefault();
+  const form = event.currentTarget;
+  if (state.activeOperations.has("save-block")) return;
   const payload = {
     barber_id: document.getElementById("block-barber").value,
     block_date: document.getElementById("block-date").value,
@@ -423,28 +551,38 @@ document.getElementById("block-form").addEventListener("submit", async function 
     message.dataset.kind = "error";
     return;
   }
-  const result = await database.from("blocked_slots").insert(payload);
-  if (result.error) {
-    message.textContent = result.error.code === "23505" ? "Esse bloqueio já existe." : "Não foi possível bloquear o horário.";
-    message.dataset.kind = "error";
-    return;
+  state.activeOperations.add("save-block");
+  setFormBusy(form, true);
+  try {
+    const result = await database.from("blocked_slots").insert(payload);
+    if (result.error) {
+      message.textContent = result.error.code === "23505" ? "Esse bloqueio já existe." : "Não foi possível bloquear o horário.";
+      message.dataset.kind = "error";
+      return;
+    }
+    form.reset();
+    document.getElementById("block-date").min = localDateString();
+    message.textContent = "";
+    showToast("Horário bloqueado.");
+    await refreshDashboard(false);
+  } finally {
+    state.activeOperations.delete("save-block");
+    setFormBusy(form, false);
   }
-  event.target.reset();
-  document.getElementById("block-date").min = localDateString();
-  message.textContent = "";
-  showToast("Horário bloqueado.");
-  await loadAllData();
-  renderAll();
 });
 
 document.getElementById("block-list").addEventListener("click", async function (event) {
   const button = event.target.closest("[data-delete-block]");
   if (!button || !window.confirm("Liberar este horário novamente?")) return;
-  const result = await database.from("blocked_slots").delete().eq("id", button.dataset.deleteBlock);
-  if (result.error) return showToast("Não foi possível liberar o horário.", "error");
-  await loadAllData();
-  renderAll();
-  showToast("Horário liberado.");
+  await runLocked("delete-block:" + button.dataset.deleteBlock, [button], async function () {
+    const result = await database.from("blocked_slots").delete().eq("id", button.dataset.deleteBlock);
+    if (result.error) {
+      showToast("Não foi possível liberar o horário.", "error");
+      return;
+    }
+    await refreshDashboard(false);
+    showToast("Horário liberado.");
+  });
 });
 
 async function initializeDashboard() {
@@ -452,14 +590,27 @@ async function initializeDashboard() {
   renderProfile();
   document.getElementById("schedule-date").value = localDateString();
   document.getElementById("block-date").min = localDateString();
-  try {
-    await loadAllData();
-    renderAll();
+  const loaded = await refreshDashboard(false);
+  if (loaded !== false) {
     document.body.classList.remove("is-loading");
     document.getElementById("admin-loader").hidden = true;
-  } catch (error) {
+    subscribeToAppointments();
+  } else {
     document.getElementById("admin-loader").innerHTML = '<span>!</span><p>Não foi possível carregar o painel. Atualize a página.</p>';
   }
 }
+
+database.auth.onAuthStateChange(function (event) {
+  if (event === "SIGNED_OUT") window.location.replace("/admin/login");
+});
+
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "visible" && state.user) refreshDashboard(false);
+});
+
+window.addEventListener("beforeunload", function () {
+  window.clearTimeout(state.realtimeTimer);
+  if (state.realtimeChannel) database.removeChannel(state.realtimeChannel);
+});
 
 initializeDashboard();
